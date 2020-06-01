@@ -1,0 +1,147 @@
+<html>
+<head>
+<title>Typeahead</title>
+</head>
+
+<body onload = "start()">
+
+<input type="text" id = "trie" placeholder="Enter country name" onkeyup="suggest()" onfocusout="done()">
+
+<p id="suggest">
+
+</p>
+
+<script>
+function TrieNode(key) {
+  this.key = key;  
+  this.parent = null;  
+  this.children = {};  
+  this.end = false;
+}
+
+TrieNode.prototype.getWord = function() {
+  var output = [];
+  var node = this;
+  
+  while (node !== null) {
+    output.unshift(node.key);
+    node = node.parent;
+  }
+  
+  return output.join('');
+};
+
+
+function Trie() {
+  this.root = new TrieNode(null);
+}
+
+Trie.prototype.insert = function(word) {
+  var node = this.root;
+  
+  for(var i = 0; i < word.length; i++) {
+    if (!node.children[word[i]]) {
+      node.children[word[i]] = new TrieNode(word[i]);
+      
+      node.children[word[i]].parent = node;
+    }
+    
+    node = node.children[word[i]];
+    
+    if (i == word.length-1) {
+      node.end = true;
+    }
+  }
+};
+
+Trie.prototype.contains = function(word) {
+  var node = this.root;
+  
+  for(var i = 0; i < word.length; i++) {
+    if (node.children[word[i]]) {
+      node = node.children[word[i]];
+    } else {
+      return false;
+    }
+  }
+  
+  return node.end;
+};
+
+Trie.prototype.find = function(prefix) {
+  var node = this.root;
+  var output = [];
+  
+  for(var i = 0; i < prefix.length; i++) {
+    if (node.children[prefix[i]]) {
+      node = node.children[prefix[i]];
+    } else {
+      return output;
+    }
+  }
+  
+  findAllWords(node, output);
+  
+  return output;
+};
+
+function findAllWords(node, arr) {
+  if (node.end) {
+    arr.unshift(node.getWord());
+  }
+  
+  for (var child in node.children) {
+    findAllWords(node.children[child], arr);
+  }
+}
+
+var trie = new Trie();
+
+function start() {
+	countries = ["New Zealand","Afghanistan","Albania","Algeria","Andorra","Angola","Antigua","Deps","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia","Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina","Burundi","Cambodia","Cameroon","Canada","Cape","Verde","Central","African","Rep","Chad","Chile","China","Colombia","Comoros","Congo","Congo","Democratic","Rep","Costa","Rica","Croatia","Cuba","Cyprus","Czech","Republic","Denmark","Djibouti","Dominica","Dominican","Republic","East","Timor","Ecuador","Egypt","El","Salvador","Equatorial","Guinea","Eritrea","Estonia","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Republic","Israel","Italy","Ivory","Coast","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Korea","North","Korea","South","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall","Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar,","{Burma}","Namibia","Nauru","Nepal","Netherlands","New","Zealand","Nicaragua","Niger","Nigeria","Norway","Oman","Pakistan","Palau","Panama","Papua","New","Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russian","Federation","Rwanda","St","Kitts","Nevis","St","Lucia","Saint","Vincent","the","Grenadines","Samoa","San","Marino","Sao","Tome","Principe","Saudi","Arabia","Senegal","Serbia","Seychelles","Sierra","Leone","Singapore","Slovakia","Slovenia","Solomon","Islands","Somalia","South","Africa","South","Sudan","Spain","Sri","Lanka","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Tonga","Trinidad","Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United","Arab","Emirates","United","Kingdom","United","States","Uruguay","Uzbekistan","Vanuatu","Vatican","City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"]
+
+	for(let i=0;i<countries.length;i++) {
+		trie.insert(countries[i]);
+		//console.log(countries[i]);
+	}
+}
+
+
+function suggest() {
+
+	var myNode = document.getElementById("suggest");
+  	myNode.innerHTML = '';
+
+	var s = document.getElementById("trie").value;
+
+	if(s.length == 0) return;
+
+	var ans = trie.find(s);
+
+	if(ans.length == 0) return;
+	var sstring = "";
+	for(let i=0;i<ans.length;i++){
+		let j = 0;
+		sstring += "<b>";
+		while(j < s.length)
+			sstring += ans[i][j++];
+		sstring += "</b>";
+		while(j < ans[i].length)
+			sstring += ans[i][j++];
+		sstring += "<br>";
+	}
+	document.getElementById("suggest").innerHTML = sstring;
+}
+
+function done() {
+	document.getElementById("trie").value = "";
+	document.getElementById("suggest").innerHTML = "";
+}
+
+</script>
+
+<p>Greatness</p>
+
+</body>
+
+</html>
