@@ -1,15 +1,19 @@
+
 <html>
 <head>
 <title>Typeahead</title>
+<style>
+
+</style>
 </head>
 
 <body onload = "start()">
 
 <input type="text" id = "trie" placeholder="Enter country name" onkeyup="suggest()" onfocusout="done()">
 
-<p id="suggest">
+<ul id="suggest" style="list-style-type:none">
 
-</p>
+</ul>
 
 <script>
 function TrieNode(key) {
@@ -58,7 +62,7 @@ Trie.prototype.contains = function(word) {
   var node = this.root;
   
   for(var i = 0; i < word.length; i++) {
-    if (node.children[word[i]]) {
+    if (node.children[word[i]] || node.children[word[i]]) {
       node = node.children[word[i]];
     } else {
       return false;
@@ -73,9 +77,11 @@ Trie.prototype.find = function(prefix) {
   var output = [];
   
   for(var i = 0; i < prefix.length; i++) {
-    if (node.children[prefix[i]]) {
-      node = node.children[prefix[i]];
-    } else {
+    if (node.children[prefix[i].toLowerCase()]) {
+      node = node.children[prefix[i].toLowerCase()];
+	} else if(node.children[prefix[i].toUpperCase()]) {
+		node = node.children[prefix[i].toUpperCase()];
+	} else {
       return output;
     }
   }
@@ -102,7 +108,6 @@ function start() {
 
 	for(let i=0;i<countries.length;i++) {
 		trie.insert(countries[i]);
-		//console.log(countries[i]);
 	}
 }
 
@@ -122,18 +127,29 @@ function suggest() {
 	var sstring = "";
 	for(let i=0;i<ans.length;i++){
 		let j = 0;
+		sstring += "<li>";
 		sstring += "<b>";
-		while(j < s.length)
-			sstring += ans[i][j++];
+		while(j < s.length) {
+			if (j == 0) {
+				let c = ans[i][j].toUpperCase();
+				sstring += c;
+			}
+			else {
+				let c = ans[i][j].toLowerCase();
+				sstring += c;
+			}
+			j++;
+		}
 		sstring += "</b>";
 		while(j < ans[i].length)
-			sstring += ans[i][j++];
-		sstring += "<br>";
+			sstring += ans[i][j++].toLowerCase();
+		sstring += "</li>";
 	}
 	document.getElementById("suggest").innerHTML = sstring;
 }
 
 function done() {
+
 	document.getElementById("trie").value = "";
 	document.getElementById("suggest").innerHTML = "";
 }
